@@ -70,5 +70,30 @@ if surveryAnswer != nil {
     
 }
 if let answer = surveryAnswer {
+    print(answer)
+}
+
+// if 语句多个判断条件，中间用逗号隔开
+// 只要有一个判断条件为空，或者为 false， if 语句整体就为 false
+if let firstNumber = Int("4"), let secondNumber = Int("200"), firstNumber < secondNumber && secondNumber > 100 {
+    print("in")
+}
+
+// 隐式可选类型 对于可选类型，每次都要判断和解析可选值是非常低效的，因为可以确定它总会有值。所以更好的方法是使用隐式可选类型
+let assumedString: String! = "An implicitly unwrapped optional string"
+let impliciteString: String = assumedString // 相比可选类型，不需要感叹号来强制解析
+
+// 错误处理
+func canThrowAnError() throws {
     
 }
+// 对应的，要使用 try-catch 来捕获
+do {
+    try canThrowAnError()
+} catch {
+    print(error)
+}
+
+// 断言 与 OC 相同
+let age = 3
+assert(age >= 0, "age cannot be less than zero")
