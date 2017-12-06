@@ -34,6 +34,7 @@ default:
     naturalCount = "many"
 }
 print("there are \(naturalCount)\(countedThings)")
+
 // switch 匹配元组
 // 元组中的元素可以是值，也可以是区间。 用下划线(_)来匹配所有可能的值
 
@@ -73,4 +74,21 @@ default:
     print("not on an axis")
 }
 
+// 提前退出 guard
+// guard 语句是当条件为真时，执行 guard 语句后的代码.
+// 如果 guard 语句的条件被满足，则继续执行 guard 语句大括号后的代码。
+// 如果 guard 语句的条件不被满足，则 else 分支上的代码就会被执行。else 分支必须转移控制以退出 guard 语句。如使用 return、break、continue、throw 或者调用一个不返回的方法或函数,如：fatalError()
+func greet(person: String?) {
+    guard person != nil else {
+        fatalError()
+    }
+    print("Hello,\(person!)")
+}
+greet(person: "Leo")
 
+// 检测 API 可用性
+if #available(iOS 10, macOS 10.12, *) {
+    
+} else {
+    
+}
