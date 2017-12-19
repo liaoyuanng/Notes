@@ -126,5 +126,18 @@ func serve2(customer customerProvider: @autoclosure ()->String) {
 }
 serve2(customer: customersinLine.remove(at: 0)) // 比上面少了大括号，可读性更强
 
+// 枚举的 可递归性 和 值关联
 
+indirect enum ArithmeticExpression {
+    case number(Int)
+    case addition(ArithmeticExpression, ArithmeticExpression)
+}
+
+let sum = ArithmeticExpression.addition(ArithmeticExpression.number(5), ArithmeticExpression.number(6))
+switch sum {
+    case .number
+    print(sum)
+    case let .addition(left, right)
+    print(left + right)
+}
 
