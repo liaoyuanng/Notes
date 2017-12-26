@@ -20,3 +20,5 @@ struct Point {
 var somePoint = Point.init(x: 1.0, y: 1.0)
 somePoint.moveByX(2.0, y: 3.0)
 
+
+
