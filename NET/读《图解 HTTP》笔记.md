@@ -326,6 +326,25 @@ HTTP 首部字段是构成 HTTP 报文的要素之一。它分为四种：
     该字段一般会搭配`code 3xx Redirection`使用,提供重定向的`URI`
     
     
+5. Retry-After
 
+    告知客户端应该在多久之后再次发送请求，常配合状态码`503 Service Unavailable`或`3xx Redirect`响应一起使用。
     
+    ```
+    Retry-After:120
+    // or
+    Retry-After: Wed, 04 Jul 2012 06:34:24
+    ```
+    
+6. Server
+
+    告知客户端，当前服务器上安装的`HTTP`服务器应用程序的信息。
+    
+    ```
+    Server:Apache/2.2.17(Unix)
+    ```
+    
+#### 实体首部字段
+
+实体首部字段是包含在请求报文和响应报文中的实体部分所使用的首部，用与补充内容的更新时间与实体相关的信息。 
 
