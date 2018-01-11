@@ -1,10 +1,16 @@
 # 读《图解 HTTP》笔记
 
-## ARP 协议
+## 一些常见名词解释
 
-ARP协议(`Address Resolution Protocol`)，即地址解析协议。是根据`IP`地址获取物理地址(MAC)的`TCP/IP协议`。
+ARP协议(`Address Resolution Protocol`)，即地址解析协议。是根据`IP`地址获取物理地址(MAC)。
 
-## TCP
+DNS协议(`Domain Name Server`)，是根据`域名`来转换与之相应的`IP`地址服务器。
+
+## TCP/IP
+
+`TCP/IP`是一个协议簇，在它之上，包含了众多协议。
+
+![](http://7xsgdb.com1.z0.glb.clouddn.com/15156883179446.jpg)
 
 `TCP`位于传输层，提供可靠的字节流(注意这里的描述**字节流**,所以 TCP 是流，而不是包)服务。为了准确无误的将数据送达目标，`TCP`协议采用三次握手(three-way handshaking) 策略:
 
@@ -51,7 +57,7 @@ HTTP 协议规定：请求从`客户端`发出，`服务器`端回复响应。
 | LINK(已废弃) | 建立和资源之间的联系 | 1.0 |
 | UNLINK(已废弃) | 断开连接关系 | 1.0 |
 
-其中，`HEAD`方法是获得报文首部，和`GET`方法一样，只是不返回报文主体部分。用于确认 URI 的有效性及资源更新的日期时间等。`PUT`和`DELETE`方法由于不带验证机制，所以一般不使用。`OPTIONS`方法用查询针对请求URI指定资源支持的方法。
+其中，`HEAD`方法是获得报文首部，和`GET`方法一样，只是不返回报文主体部分。用于确认 URI 的有效性及资源更新的日期时间等。`PUT`和`DELETE`方法由于不带验证机制，所以一般不使用。`OPTIONS`方法用查询针对请求`URI`指定资源支持的方法。
 
 ![](http://7xsgdb.com1.z0.glb.clouddn.com/15153071237018.jpg)
 
@@ -134,7 +140,7 @@ HTTP 首部字段是构成 HTTP 报文的要素之一。它分为四种：
 * 响应首部字段: 服务器端返回响应报文时使用的首部。
 * 实体首部字段: 针对请求报文和响应报文的实体部分使用的首部。
 
-部分字段解释：
+下面是部分字段解释。
 
 #### 通用首部字段
 
@@ -213,6 +219,8 @@ HTTP 首部字段是构成 HTTP 报文的要素之一。它分为四种：
         
 #### 请求首部字段(部分)
 
+> 注：下面的"用户代理"指的是客户端
+
 `请求首部字段`是从`客户端`往`服务器端`发送请求报文中所使用的字段，用于补充请求的`附加信息`、`客户端信息`、`对响应内容相关的优先级`等内容。
 
 1. Accept
@@ -277,7 +285,7 @@ HTTP 首部字段是构成 HTTP 报文的要素之一。它分为四种：
     ![](http://7xsgdb.com1.z0.glb.clouddn.com/15155527531865.jpg)
 
 
-8. TE
+8. TE(Accept-Transfer-Encoding)
 
     告知服务器，客户端能够处理响应的`传输编码方式`及`优先级`
     
@@ -361,11 +369,15 @@ HTTP 首部字段是构成 HTTP 报文的要素之一。它分为四种：
 
     告知客户端，服务器对实体的主体部分选用的内容编码方式。主要有 4 种内容编码的方式:`gzip`、`compress`、`deflate`、`identity`.
     
-3. Content-Language
+3. Content-Type
+
+    表示报文主体的对象类型。默认是`text/html`。
+    
+4. Content-Language
     
     告知客户端，实体主体使用的自然语言(zh、en、jp...)
     
-4. Content-Length
+5. Content-Length
 
     表明了实体主体部分的大小，单位字节。
     
@@ -448,4 +460,47 @@ HTTPS 采用的是`对称加密`和`非对称加密`混合的机制。
 
 ![](http://7xsgdb.com1.z0.glb.clouddn.com/15156709170124.jpg)
 
+
+## 全双工通信 WebSocket
+
+`WebSocket`，即`Web`浏览器和`Web`服务器之间全双工通信标准，建立在`HTTP`协议之上，发起方仍是`客户端`。一旦`Web服务器`于`客户端`之间建立`WebSocket`协议的通信连接，之后所有的通信都用这个专用协议进行。通讯过程中可互相发送`JSON`、`XML`、`HTML`或者`图片`等任意格式的数据。一旦连接确立，无论是服务器，还是客户端，都可以直接向对方发送报文。
+
+### 握手
+
+为了实现`WebSocket`通信，在`HTTP`连接建立后，需要完成一次握手的步骤。
+
+#### 请求
+
+```
+GET /chat HTTP/1.1
+Host: server.example.com
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
+Origin: http://example.com
+Sec-WebSocket-Protocol: chat, superchat
+Sec-WebSocket-Version: 13
+```
+
+其中,`Upgrade`首部字段告知服务器要更新的通信协议，如果服务器支持，会返回`101 Switching Protocols`响应。
+
+#### 响应
+
+```
+HTTP/1.1 101 Switching Protocols
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
+Sec-WebSocket-Protocol: chat
+```
+
+#### 握手结束
+
+成功握手确立`WebSocket`连接之后，通信时不在使用`HTTP`的数据帧，而是采用`WebSocket`独立的数据帧。
+
+![](http://7xsgdb.com1.z0.glb.clouddn.com/15156865516613.jpg)
+
+
+
+> 文中所有图片均来自[图解 HTTP](https://www.amazon.cn/dp/B00JTQK1L4/ref=sr_1_1?ie=UTF8&qid=1515687926&sr=8-1&keywords=%E5%9B%BE%E8%A7%A3http)一书。仅作为阅读笔记，关于更多内容请购买正版查阅。
 
