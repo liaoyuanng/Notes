@@ -211,7 +211,7 @@ HTTP 首部字段是构成 HTTP 报文的要素之一。它分为四种：
         Data: Tue Jul 02 02:02:02 2018
         ```
         
-#### 请求首部字段
+#### 请求首部字段(部分)
 
 `请求首部字段`是从`客户端`往`服务器端`发送请求报文中所使用的字段，用于补充请求的`附加信息`、`客户端信息`、`对响应内容相关的优先级`等内容。
 
@@ -292,7 +292,7 @@ HTTP 首部字段是构成 HTTP 报文的要素之一。它分为四种：
     User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:13.0) Gecko/20100101 Firefox/13.0.1
     ```
 
-#### 响应首部字段
+#### 响应首部字段(部分)
 
 `响应首部字段`是由`服务器`向`客户端`返回响应报文中所使用的字段，用于补充响应的附加信息、服务器信息，以及对客户端的附加要求等。
 
@@ -345,7 +345,107 @@ HTTP 首部字段是构成 HTTP 报文的要素之一。它分为四种：
     Server:Apache/2.2.17(Unix)
     ```
     
-#### 实体首部字段
+#### 实体首部字段(部分)
 
 实体首部字段是包含在请求报文和响应报文中的实体部分所使用的首部，用与补充内容的更新时间与实体相关的信息。 
+
+1. Allow
+    
+    告知客户端，能够支持`Request-URI`指定资源的所有 HTTP 方法。当服务器接收到不支持的 HTTP 方法时，会以`405 Method Not Allowed`作为响应返回。
+    
+    ```
+    Allow: GET,HEAD
+    ```
+    
+2. Content-Encoding
+
+    告知客户端，服务器对实体的主体部分选用的内容编码方式。主要有 4 种内容编码的方式:`gzip`、`compress`、`deflate`、`identity`.
+    
+3. Content-Language
+    
+    告知客户端，实体主体使用的自然语言(zh、en、jp...)
+    
+4. Content-Length
+
+    表明了实体主体部分的大小，单位字节。
+    
+#### 为Cookie服务的首部字段
+
+* Set-Cookie 开始状态管理所使用的 Cookie 信息，在响应首部字段里。
+* Cookie 服务器接收到的 Cookie 信息(由客户端发出)，在请求首部字段里。
+
+![](http://7xsgdb.com1.z0.glb.clouddn.com/15156532484114.jpg)
+
+1. Set-Cookie 字段属性
+
+```
+Set-Cookie: status=enable; expires=Tue, 05 Jul 2011 07:26:31 GMT; path=/; domain=.hackr.jp; secure; httponly
+```
+
+属性格式为：`NAME=VALUE`。
+
+* expires, Cookie 的有效期，若不指定，默认为浏览器关闭前为止。
+* path，将服务器上的文件目录作为 Cookie 的适用对象。
+* domain，作为 Cookie 适用对象的域名
+* Secure，仅在 HTTPS 安全通信时才会发送 Cookie
+* HttpOnly，加以限制，使 Cookie 不能被 JavaScript 脚本访问。
+
+#### 其他首部字段
+
+1. X-Frame-Options
+
+```
+X-Frame-Options: DENY
+```
+
+`X-Frame-Options`属于 HTTP 响应首部，用于控制网站内容在其他 Web 网站的 Frame 标签内的显示问题。主要目的是为了防止[点击劫持](https://zh.wikipedia.org/zh-hans/%E7%82%B9%E5%87%BB%E5%8A%AB%E6%8C%81)，这里还有一个例子很好的说明这个问题：[Web安全之点击劫持(ClickJacking)](https://www.cnblogs.com/lovesong/p/5248483.html)
+
+#### HTTP 的不足
+
+* 通信使用明文，内容可能会被窃听
+* 不验证通信方的身份，因此有可能遭遇伪装
+* 无法证明报文的完整性，所以有可能已遭篡改(中间人攻击)
+
+
+## HTTPS
+
+HTTPS 就是针对 HTTP 的不足，做出了改善。
+
+![](http://7xsgdb.com1.z0.glb.clouddn.com/15156604937937.jpg)
+
+1. 通信的加密
+
+    `HTTPS`在`HTTP`上加入了`SSL`。
+    
+2. 证书验证
+
+    `SSL`不仅提供加密处理，而且还使用了一种被称为`证书`的手段，可用于确定对方信息。`证书`由值得信任的第三方机构颁发。
+    
+    ![](http://7xsgdb.com1.z0.glb.clouddn.com/15156596068342.jpg)
+
+### 加密方式
+
+HTTPS 采用的是`对称加密`和`非对称加密`混合的机制。
+
+### HTTPS 通讯过程
+
+前面说到，`HTTPS`其实就是一个披着`SSL`的`HTTP`，所以，通讯过程也就是在`HTTP`通讯前，先建立`SSL`连接。
+
+1. 客户端发送`ClientHello`报文，开始`SSL`通信，报文中包含客户端支持的`SSL`的指定版本、加密组件列表(所使用的加密算法及密钥长度等)
+2. 服务器端会以`ServerHello`报文作为应答。同客户端一样，报文中包含`SSL`版本以及加密组件，加密组件的内容是从接收的客户端加密组件内筛选出来的。
+3. 服务器端发送`Certificate`报文。报文中包含公开密钥证书。
+4. 最后服务器端发送`ServerHelloDone`报文，`SSL`第一次握手结束。
+5. 客户端发送`ClientKeyExchange`报文作为回应。报文中包含通信加密中使用的一种被称为`Pre-master-secret`的随机密码串。这里的报文已经用步骤3中的公开密钥进行加密。
+6. 客户端发送`ChangeCipherSpec`报文，该报文会提示服务器，在之后的通信会采用`Pre-master secret`密钥加密。
+7. 客户端发送`Finished`报文。该报文包含连接至今全部报文的整体校验值。握手是否成功，要依服务器是否能够正确解密该报文作为判定标准
+8. 服务器端发送`ChangeCipherSpec`报文
+9. 服务器端发送`Finished`报文。
+10. 当`Finished`报文交换完毕之后，`SSL`连接就算建立完成，之后的通信都会受到`SSL`的保护。接下来就是`HTTP`的请求了。
+
+### HTTPS 速度慢
+
+首先，`HTTPS`和`HTTP`相比，网络负载可能会变慢2-100倍，`SSL`的通信慢，而且`SSL`的加密解密也需要耗费大量的 CPU 以及内存资源。
+
+![](http://7xsgdb.com1.z0.glb.clouddn.com/15156709170124.jpg)
+
 
